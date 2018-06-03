@@ -22,7 +22,7 @@ issues, as well as missing features.
 Installation
 ************
 
-Please see the `installation section <http://http://codeplus.dkrock.com>`_
+Please see the `installation section <http://codeplus.dkrock.com>`_
 of the Codeplus User Guide.
 
 *********
