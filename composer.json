@@ -1,0 +1,12 @@
+{
+    "autoload": {
+        "classmap": [
+            "Framework",
+            "Framework/Database",
+            "Framework/Libraries/JWT",
+            "Business",
+            "AppCode",
+            "AppConfig"
+        ]
+    }
+}
