@@ -1,3 +1,6 @@
+
+.. image:: http://codeplus.dkrock.com/assets/images/logo.png
+
 ###################
 What is Codeplus
 ###################
