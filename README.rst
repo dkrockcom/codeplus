@@ -40,5 +40,5 @@ Report security issues to our `mail <mailto:support@dkrock.com>`_
 Acknowledgement
 ***************
 
-The Codeplus (dkrock) team would like to thank EllisLab, all the
+The Codeplus (dkrock) team would like to thank all the
 contributors to the Codeplus project and you, the Codeplus user.
