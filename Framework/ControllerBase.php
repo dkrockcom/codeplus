@@ -121,17 +121,21 @@ class ControllerBase
 
                 case GETLIST:
                     $records = array();
+                    $recordCount = 0;
                     $db = new Database();
                     $tableView = 'vw' . $this->Context->tableName() . 'List';
                     if (sizeof($this->Filters) == 0) {
+                        $recordCount = $db->getValue ($tableView, "count(*)");
                         $db->orderBy($this->Context->keyField(), "Desc");
                         $records = $db->withTotalCount()->get($tableView, array($this->StartIndex, $this->Limit));
                     } else {
                         $flt = new Filter();
                         $flt->applyFilters($this->Filters, $db);
+                        $recordCount = $db->getValue($tableView, "count(*)");
+                        $db->orderBy($this->Context->keyField(), "Desc");
                         $records = $db->withTotalCount()->get($tableView, array($this->StartIndex, $this->Limit));
                     }
-                    Common::serializeObject(array(SUCCESS => true, DATA => $records, RECORD_COUNT => sizeof($records)));
+                    Common::serializeObject(array(SUCCESS => true, DATA => $records, RECORD_COUNT => $recordCount));
                     break;
 
                 case OTHERACTION:
