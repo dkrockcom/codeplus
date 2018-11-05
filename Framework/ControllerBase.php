@@ -225,7 +225,7 @@ class ControllerBase
         $db = new Database();
         $db->join("Lookup l", "l.LookupTypeId=lt.LookupTypeId", "LEFT");
         $db->joinWhere("Lookup l", "l.LookupTypeId", $lookupId);
-        $data = $db->get("LookupType lt", null, "*");
+        $data = $db->get("LookupType lt", null, "l.LookupId, l.DisplayValue");
         return $data;
     }
 

@@ -1,6 +1,6 @@
 CREATE TABLE `LookupType` (
   `LookupTypeId` int(11) NOT NULL AUTO_INCREMENT,
-  `DisplayValue` varchar(100) DEFAULT NULL,
+  `LookupType` varchar(100) NOT NULL,
   `ScopId` int(11) DEFAULT '0',
   `CreatedOn` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `CreatedBy` int(11) DEFAULT NULL,
