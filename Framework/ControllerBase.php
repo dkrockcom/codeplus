@@ -13,6 +13,9 @@ class ControllerBase
     public $Filters = array();
     public $Context = null;
     public $db = null;
+    public $Sort = null;
+    public $Dir = null;
+    public $Combos = array();
 
     /**
      * __construct constructor parse the field value and return parsed value
@@ -43,6 +46,9 @@ class ControllerBase
             $this->StartIndex = $this->params("startindex", false, 0);
             $this->Limit = $this->params("limit", false, 25);
             $this->Filters = $this->params("filters", false, array());
+            $this->Sort = $this->params("sort", false, null);
+            $this->Dir = $this->params("dir", false, null);
+            $this->Combos = $this->params("combos", false, array());
         }
         $this->actionHandler();
     }
@@ -102,7 +108,15 @@ class ControllerBase
                 case LOAD:
                     if (isset($this->Id)) {
                         $this->Context->Load($this->Id);
-                        $reponse = array(SUCCESS => true, DATA => is_null($this->Context->Id) ? array() : array($this->Context));
+                        $hasData = !is_null($this->Context->Id);
+                        $reponse[SUCCESS] = $hasData;
+                        if ($hasData) {
+                            $comboData = $this->getCombos($this->Combos);
+                            $reponse[DATA] = array($this->Context);
+                            $reponse["Combos"] = $comboData;
+                        } else {
+                            $reponse[MESSAGE] = RECORDS_NOT_EXISTS;
+                        }
                     } else {
                         $reponse = array(SUCCESS => false, ERROR => ID_NOT_BLANK_ZERO);
                     }
@@ -124,18 +138,24 @@ class ControllerBase
                     $recordCount = 0;
                     $db = new Database();
                     $tableView = 'vw' . $this->Context->tableName() . 'List';
+                    $dir = isset($this->Dir) ? $this->Dir : "DESC";
+                    $sort = isset($this->Sort) ? $this->Sort : $this->Context->keyField();
+                    $comboData = $this->getCombos($this->Combos);
                     if (sizeof($this->Filters) == 0) {
-                        $recordCount = $db->getValue ($tableView, "count(*)");
-                        $db->orderBy($this->Context->keyField(), "Desc");
+                        $recordCount = $db->getValue($tableView, "count(*)");
+                        $db->orderBy($sort, $dir);
                         $records = $db->withTotalCount()->get($tableView, array($this->StartIndex, $this->Limit));
                     } else {
                         $flt = new Filter();
                         $flt->applyFilters($this->Filters, $db);
                         $recordCount = $db->getValue($tableView, "count(*)");
-                        $db->orderBy($this->Context->keyField(), "Desc");
+                        $flt = new Filter();
+                        $db = new Database();
+                        $flt->applyFilters($this->Filters, $db);
+                        $db->orderBy($sort, $dir);
                         $records = $db->withTotalCount()->get($tableView, array($this->StartIndex, $this->Limit));
                     }
-                    Common::serializeObject(array(SUCCESS => true, DATA => $records, RECORD_COUNT => $recordCount));
+                    Common::serializeObject(array(SUCCESS => true, DATA => $records, RECORD_COUNT => $recordCount, "Combos" => $comboData));
                     break;
 
                 case OTHERACTION:
@@ -161,7 +181,7 @@ class ControllerBase
     {
         $requestParam = $this->requestParam();
         $fieldValue = array_key_exists($field, $requestParam) ? $requestParam[$field] : (isset($defaultValue) ? $defaultValue : null);
-        if ($field == "filters") {
+        if ($field == "filters" || $field == "combos") {
             if (sizeof($fieldValue) == 0) {
                 return $fieldValue;
             }
@@ -174,6 +194,39 @@ class ControllerBase
             exit();
         }
         return $fieldValue;
+    }
+
+    /**
+     * getCombos method - Get Combos data in array, which are passes from client side.
+     * @param array $combos - Combos which are passed from client side.
+     *
+     * @return Comobos Data array
+     */
+    private function getCombos($combos)
+    {
+        $comboData = array();
+        $lookupTypes = new ReflectionClass('LookupType');
+        foreach ($combos as $key => $value) {
+            if ($lookupTypes->getConstant($value)) {
+                $comboData[$value] = $this->getComboData($lookupTypes->getConstant($value));
+            }
+        }
+        return $comboData;
+    }
+
+    /**
+     * getComboData method - Get Combo Data based on lookup id.
+     * @param int $lookupId - lookup id for find the combo items records
+     *
+     * @return ComboRecords
+     */
+    private function getComboData($lookupId)
+    {
+        $db = new Database();
+        $db->join("Lookup l", "l.LookupTypeId=lt.LookupTypeId", "LEFT");
+        $db->joinWhere("Lookup l", "l.LookupTypeId", $lookupId);
+        $data = $db->get("LookupType lt", null, "*");
+        return $data;
     }
 
     /**
