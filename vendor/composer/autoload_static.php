@@ -19,6 +19,7 @@ class ComposerStaticInitaae97774b5db8ac286e1301dede91e80
         'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/../..' . '/Framework/Libraries/JWT/SignatureInvalidException.php',
         'Identity' => __DIR__ . '/../..' . '/Framework/Indentity.php',
         'LookupType' => __DIR__ . '/../..' . '/AppCode/LookupType.php',
+        'MailParam' => __DIR__ . '/../..' . '/Framework/Utility/MailParam.php',
         'User' => __DIR__ . '/../..' . '/Business/User.php',
         'WebSocketServer' => __DIR__ . '/../..' . '/Framework/WebSocket/Websockets.php',
         'WebSocketUser' => __DIR__ . '/../..' . '/Framework/WebSocket/WebSocketUser.php',

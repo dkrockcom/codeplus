@@ -22,18 +22,23 @@ class BusinessBase
         try {
             $properties = get_object_vars($this);
             array_splice($properties, array_search(ID, array_keys($properties)), 1);
-            if (is_null($id)) {
+            if (is_null($id) && is_null($this->Id)) {
                 $li = $id = $db->insert($this->tableName(), $properties);
             } else {
+                $id = isset($id) ? $id : (isset($this->Id) ? $this->Id : 0);
                 $db->where($this->keyField(), $id);
                 $db->update($this->tableName(), $properties);
-                if ($db->count == 0) {
-                    throw new Exception("Invalid record");
+                if ($db->_stmtErrno > 0) {
+                    $db->rollback();
+                    Common::error($db->_stmtError);
+                    return;
                 }
             }
             $db->commit();
             if ($db->_stmtErrno > 0) {
-                throw new Exception($db->_stmtError);
+                $db->rollback();
+                Common::error($db->_stmtError);
+                return;
             }
             $this->load(isset($id) ? $id : $li);
         } catch (Exception $ex) {

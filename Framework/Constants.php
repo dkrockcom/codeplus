@@ -93,6 +93,7 @@ define('SHOULD_NOT_BE_BLANK', ' should not be blank');
 define('FILE_UPLOADED', 'File Uploaded');
 define('INVALID_USERNAME_PASSWORD', 'Invalid username and password.');
 define('RECORDS_NOT_EXISTS', "Opp's Record not exists.");
+define('INVALID_ACTION', 'Invalid action.');
 
 //BusinessBase
 define('ID', 'Id');

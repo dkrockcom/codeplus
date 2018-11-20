@@ -23,14 +23,22 @@ class Common
     /**
      * serializeObject method - Generate rest conroller json output for client side uses
      * @param object $data - data can be a array/object
-     *
-     * @return jsonArray
      */
     public static function serializeObject($data)
     {
         header('Content-type: application/json');
         echo json_encode($data);
         exit();
+    }
+
+    /**
+     * error method - Generate rest conroller json error output for client side uses
+     * @param string $message - messgage can be string.
+     */
+    public static function error($message)
+    {
+        $response = array(SUCCESS => false, ERROR => $message);
+        self::serializeObject($response);
     }
 
     /**
@@ -66,6 +74,27 @@ class Common
     }
 
     /**
+     * sendMail method - Send email from server with specific params
+     * @param string $to - Receiver Email Address
+     * @param string $from - Send Email Address
+     * @param string $subject - Subject of the email
+     * @param string $body - Content for the mail.
+     * @param string $isHTML - Check for mail sent in html and simple.
+     *
+     * @return bool status of mail sent.
+     */
+    public static function sendMail($mailParam)
+    {
+        try {
+            //TODO: More Condition Pending to implement.
+            mail($mailParam->To, $mailParam->Subject, $mailParam->Body);
+            return array(SUCCESS => true, MESSAGE => 'Mail Sent Successfully.');
+        } catch (Exception $ex) {
+            return array(SUCCESS => false, ERROR => $ex->getMessage());
+        }
+    }
+
+    /**
      * passwordHash method - Generate password hash
      * @param string $password - Password string
      *
@@ -88,40 +117,45 @@ class Common
         try {
             // Check if the form was submitted
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+                $files = $files["file"];
                 // Check if file was uploaded without errors
                 if (isset($files) && $files["error"] == 0) {
-                    $allowed = array("jpg" => "image/jpg", "jpeg" => "image/jpeg", "gif" => "image/gif", "png" => "image/png");
                     $filename = $files["name"];
                     $filetype = $files["type"];
                     $filesize = $files["size"];
 
                     // Verify file extension
-                    $ext = pathinfo($filename, PATHINFO_EXTENSION);
-                    if (!array_key_exists($ext, $allowed)) {
-                        Common::serializeObject(array(SUCCESS => false, MESSAGE => "Error: Please select a valid file format."));
+                    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+                    if (!array_key_exists($extension, AppConfig::FILE_SUPPORT)) {
+                        Common::serializeObject(array(SUCCESS => false, ERROR => "Error: Invalid file format."));
+                        return;
                     }
 
                     // Verify file size - 5MB maximum
                     $maxsize = $size * 1024 * 1024;
                     if ($filesize > $maxsize) {
-                        Common::serializeObject(array(SUCCESS => false, MESSAGE => "Error: File size is larger than the allowed limit."));
+                        Common::serializeObject(array(SUCCESS => false, ERROR => "Error: File size is larger than the allowed limit."));
+                        return;
                     }
 
                     // Verify MYME type of the file
-                    if (in_array($filetype, $allowed)) {
+                    if (in_array($filetype, AppConfig::FILE_SUPPORT)) {
                         // Check whether file exists before uploading it
                         if (file_exists($uploaddir . $files["name"])) {
-                            Common::serializeObject(array(SUCCESS => false, MESSAGE => $files["name"] . " is already exists."));
+                            Common::serializeObject(array(SUCCESS => false, ERROR => $files["name"] . " is already exists."));
                         } else {
                             move_uploaded_file($files["tmp_name"], $uploaddir . $files["name"]);
-                            Common::serializeObject(array(SUCCESS => true, MESSAGE => "Your file was uploaded successfully."));
+                            Common::serializeObject(array(SUCCESS => true, MESSAGE => "Your file has been successfully uploaded."));
                         }
                     } else {
-                        Common::serializeObject(array(SUCCESS => false, MESSAGE => "Error: There was a problem uploading your file. Please try again."));
+                        Common::serializeObject(array(SUCCESS => false, ERROR => "Error: There was a problem uploading your file. Please try again."));
                     }
-                } else {
-                    Common::serializeObject(array(SUCCESS => false, MESSAGE => "Error: " . $files["error"]));
+                } else if ($files["error"] == 1) {
+                    Common::serializeObject(array(SUCCESS => false, ERROR => "Error: File size is larger than the allowed limit."));
                 }
+            } else {
+                Common::serializeObject(array(SUCCESS => false, ERROR => "Error: " . $files["error"]));
             }
         } catch (Exception $ex) {
             Common::serializeObject(array(SUCCESS => false, MESSAGE => $ex->getMessage()));

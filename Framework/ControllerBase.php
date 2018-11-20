@@ -6,7 +6,7 @@ class ControllerBase
     private $Request;
     private $RequestType;
     private $Header;
-    private $Action;
+    public $Action;
     private $Id = null;
     private $StartIndex = null;
     private $Limit = null;
@@ -40,8 +40,8 @@ class ControllerBase
         }
 
         $this->Request = ($this->RequestType == POST ? $_POST : ($this->RequestType == GET ? $_GET : null));
+        $this->Action = $this->params("action", false, null);
         if ($this->Request != null && $this->Context != null) {
-            $this->Action = $this->params("action", false, null);
             $this->Id = $this->params("id", false, null);
             $this->StartIndex = $this->params("startindex", false, 0);
             $this->Limit = $this->params("limit", false, 25);
@@ -189,7 +189,7 @@ class ControllerBase
             return $fieldValue;
         }
         $fieldValue = strtolower($fieldValue) == "null" ? null : $fieldValue;
-        if (!isset($defaultValue) && !isset($fieldValue) && $required) {
+        if (empty($defaultValue) && empty($fieldValue) && $required) {
             Common::serializeObject(array(SUCCESS => false, ERROR => $field . SHOULD_NOT_BE_BLANK));
             exit();
         }
@@ -225,6 +225,7 @@ class ControllerBase
         $db = new Database();
         $db->join("Lookup l", "l.LookupTypeId=lt.LookupTypeId", "LEFT");
         $db->joinWhere("Lookup l", "l.LookupTypeId", $lookupId);
+        $db->orderBy("l.DisplayValue", "ASC");
         $data = $db->get("LookupType lt", null, "l.LookupId, l.DisplayValue");
         return $data;
     }

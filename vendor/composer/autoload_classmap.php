@@ -18,6 +18,7 @@ return array(
     'Firebase\\JWT\\SignatureInvalidException' => $baseDir . '/Framework/Libraries/JWT/SignatureInvalidException.php',
     'Identity' => $baseDir . '/Framework/Indentity.php',
     'LookupType' => $baseDir . '/AppCode/LookupType.php',
+    'MailParam' => $baseDir . '/Framework/Utility/MailParam.php',
     'User' => $baseDir . '/Business/User.php',
     'WebSocketServer' => $baseDir . '/Framework/WebSocket/Websockets.php',
     'WebSocketUser' => $baseDir . '/Framework/WebSocket/WebSocketUser.php',
