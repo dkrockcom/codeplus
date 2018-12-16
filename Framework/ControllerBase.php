@@ -64,9 +64,10 @@ class ControllerBase
             if ($key == ID) {
                 continue;
             }
-            if (isset($_POST[$key])) {
-                $this->Context->$key = $_POST[$key];
-            }
+			$requestParam = $this->requestParam();
+			if (isset($requestParam[$key])) {
+				$this->Context->$key = $requestParam[$key];
+			}
         }
         if (array_key_exists(CREATED_ON, $properties) && !$isUpdate) {
             $this->Context->CreatedOn = date(AppConfig::DATETIME_FORMAT);
